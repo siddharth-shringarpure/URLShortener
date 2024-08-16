@@ -1,7 +1,7 @@
 from flask import Flask
 from .db import db
 from .urlshort import bp
-import os
+import os, stat
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,6 +20,10 @@ def create_app(test_config=None):
 
     my_app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
     my_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    if not os.path.exists(db_path):
+        open(db_path, 'a').close()  # Create the file if it doesn't exist
+    os.chmod(db_path, stat.S_IRUSR | stat.S_IWUSR)  # Ensure owner has read and write permissions
 
     db.init_app(my_app)
 
