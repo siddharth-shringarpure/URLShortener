@@ -16,14 +16,14 @@ def create_app(test_config=None):
     if not os.path.exists(db_dir):
         os.makedirs(db_dir)
 
-    db_path = os.path.join(os.getcwd(), 'db.sqlite3')
+    db_path = os.path.join(db_dir, 'db.sqlite3')
 
     my_app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
     my_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(my_app)
 
-    my_app.register_blueprint(urlshort.bp)
+    my_app.register_blueprint(bp)
 
     with my_app.app_context():  # Needed to create the tables
         try:
