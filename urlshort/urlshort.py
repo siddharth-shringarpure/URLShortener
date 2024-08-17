@@ -4,6 +4,7 @@ from typing import Any
 from flask import render_template, request, redirect, url_for, flash, abort, session, Blueprint
 from .db import db
 from .models import ShortenedURL
+from .utils import generate_short_code
 
 from sqlalchemy import text
 
@@ -26,18 +27,22 @@ def your_url():
         short_name = request.form.get("code")
         original_url = request.form.get("url")
 
-        if not re.match("^[-_a-zA-Z0-9]+$", short_name):
-            flash("Invalid short name! Use only letters, numbers, and underscores", "error")
-            return redirect(url_for("urlshort.home"))
-
-        existing_url = ShortenedURL.query.filter_by(code=short_name).first()
-        if existing_url:
-            flash("Short name already in use!", "error")
-            return redirect(url_for("urlshort.home"))
-
         if not original_url:
             flash("No URL provided", "error")
             return redirect(url_for("urlshort.home"))
+
+        if not short_name:
+            short_name = generate_short_code()
+
+        else:
+            if not re.match("^[-_a-zA-Z0-9]+$", short_name):
+                flash("Invalid short name! Use only letters, numbers, and underscores", "error")
+                return redirect(url_for("urlshort.home"))
+
+            existing_url = ShortenedURL.query.filter_by(code=short_name).first()
+            if existing_url:
+                flash("Short name already in use!", "error")
+                return redirect(url_for("urlshort.home"))
 
         new_url = ShortenedURL(code=short_name, url=original_url)
         db.session.add(new_url)
